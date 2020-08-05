@@ -1,0 +1,19 @@
+form {
+	display: flex;
+	flex-direction: column;
+	width: 20rem;
+}
+
+form input {
+	font-family: "Calibri";
+	font-size: 1rem;
+	flex-grow: 1;
+	border-radius: 10px;
+	border: 3px solid grey;
+	transition: border-color 0.5s ease-in-out 0s;
+}
+
+input:focus {
+	border-color: #800080;	/* Цвет залупы — для красоты */
+	outline: none;
+}
