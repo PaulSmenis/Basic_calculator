@@ -1,5 +1,5 @@
 <?php
-function check_correctness(string $expression): iterable {
+function check_correctness(string $expression): array {
 	$negative = 0;
 	$parentheses = 0;
 	$parses_number = 0;
@@ -101,16 +101,16 @@ function check_correctness(string $expression): iterable {
 	}
 }
 
-function dissect_binom($expression) {
-	$binom_operator;	// Индекс операции в строке
+function dissect_binom(string $expression): float {
+	$binom_operator;	// Индекс первой по приоритету 
+	// операции в строке
 
 	while (!array_filter($operations = check_correctness($expression)) &&
 			$expression[0] === '(') {	
 		$expression = substr($expression, 1, strlen($expression) - 2);
 	} // Это для удаления скобок типа ((((((выражение)))))), если такие есть
 
-	if (array_column($operations, 0)) {
-
+	if (array_column($operations, 0)) {	// Операнд это выражение
 		$binom_operator = choose_operator_cascade($operations, 0);
 
 		$substring1 = substr($expression, 0, $binom_operator);
@@ -131,29 +131,29 @@ function dissect_binom($expression) {
 			case '~':
 			return gmp_root(dissect_binom($substring1), dissect_binom($substring2));	// Целая часть после извлечения корня. Хз, норм корня нету
 		}
-	} else {	// Это одно число, расшифруем пацанчика...
+	} else {	// Операнд это число
 		return dissect_number($expression);
 	}	
 }
 
-function dissect_number($expression) {
+function dissect_number(string $expression): float {
 	$sign = 0;
 	$whole_part = 0;
-	$frac_part = 0; // Дробная часть
+	$frac_part = 0;
 
-	if ($expression[0] === '-') {		// Берём минус, откладываем
-		if (substr_count($expression, '-') % 2) { // Сумма на случай, если минус 1
+	if ($expression[0] === '-') {		// Отрицательное число
+		if (substr_count($expression, '-') % 2) {
 			$sign = 1;
 		}
 		$expression = str_replace('-', '', $expression);
 	}
 
-	if (substr_count($expression, '.')) { // Это десятичная дробь
+	if (substr_count($expression, '.')) { // Десятичная дробь
 		$k = strripos($expression, '.') - 1;
 		$whole_part = (int) $expression[$k];
 		$frac_part = (float) $expression[$k + 2];
 
-		$z = 1;	// Она только тут
+		$z = 1;
 		for ($i = $k + 3; $i < strlen($expression); $z++, $i++) {
 			$frac_part += (float) $expression[$i] / (10**$z);
 		}
@@ -167,16 +167,16 @@ function dissect_number($expression) {
 		$whole_part += (int) $expression[$k-1] * 10**$i;
 	}
 
-	$whole_part += $frac_part;
-	return ($sign) ? -$whole_part : $whole_part; // это число
+	$whole_part += $frac_part;	// Неявное преобразование в float
+	return ($sign) ? -$whole_part : $whole_part;
 }
 
-function choose_operator_cascade($operations, $n) {
+function choose_operator_cascade(array $operations, int $n): int {
 	$first = $operations[array_keys($operations)[$n]];
 	$second = $operations[array_keys($operations)[$n + 1]];
 	if ($first) {
 		if ($second) {
-			return ($first[0] < $second[0]) ? $first[0] : $second[0]; ;
+			return ($first[0] < $second[0]) ? $first[0] : $second[0];
 		} else {
 			return $first[0];
 		}
