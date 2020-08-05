@@ -15,8 +15,9 @@
 	if (isset($_GET['expression'])) {
 		include 'script.php';
 
-		$expression = $_GET['expression']; // Убирать скобки типа (((((1+1)))))
+		$expression = $_GET['expression'];
 		$expression = str_replace(' ', '', $expression);
+		$expression = dissect_binom($expression);
 	}
 	?>
 	<form action="" method="get">
