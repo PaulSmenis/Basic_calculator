@@ -21,80 +21,81 @@ function check_correctness(string $expression): array {
 			case '7':
 			case '8':
 			case '9': 
-			if ($last === '0' && !$parses_number) {
-				exit('-1');
-			} else {
-				$parses_number = 1;
-				$last = 'number';
-			}
-			break;
+				if ($last === '0' && !$parses_number) {
+					exit('-1');
+				} else {
+					$parses_number = 1;
+					$last = 'number';
+				}
+				break;
 
 			case '0':
-			if (!$parses_number && $last === '0') {
-				exit('-2');
-			} else {
-				$last = '0';
-			}
-			break;
+				if (!$parses_number && $last === '0') {
+					exit('-2');
+				} else {
+					$last = '0';
+				}
+				break;
 
 			case '.':
-			if ($parses_number && !$point) {
-				$point = 1;
-			} else if (!$parses_number && $last === '0') {
-				$point = 1;
-				$parses_number = 1;
-			} else {
-				exit('-3');
-			}
-			break;
+				if ($parses_number && !$point) {
+					$point = 1;
+				} else if (!$parses_number && $last === '0') {
+					$point = 1;
+					$parses_number = 1;
+				} else {
+					exit('-3');
+				}
+				break;
 
 			case '(':
-			if (!in_array($last, ['sign', '(', 'start'])) {
-				exit('-4');
-			} else {
-				$parentheses += 1;
-				$parses_number = 0;
-				$last = '(';
-				$operand_number = 0;
-			}
-			break;
+				if (!in_array($last, ['sign', '(', 'start'])) {
+					exit('-4');
+				} else {
+					$parentheses += 1;
+					$parses_number = 0;
+					$last = '(';
+					$operand_number = 0;
+				}
+				break;
 
 			case ')':
-			if ((!$operand_number && ($last != ')' && !$negative)) || !in_array($last, ['number', ')', '0']) || $parentheses < 1) {
-				exit('-5');
-			} else {
-				if ($negative) {
-					$negative = 0;
+				if ((!$operand_number && ($last !== ')' && !$negative)) || !in_array($last, ['number', ')', '0']) || $parentheses < 1) {
+					exit('-5');
+				} else {
+					if ($negative) {
+						$negative = 0;
+					}
+					$parentheses -= 1;
+					$parses_number = 0;
+					$last = ')';
 				}
-				$parentheses -= 1;
-				$parses_number = 0;
-				$last = ')';
-			}
-			break;
+				break;
 
 			case '-':
-			if (in_array($last, ['sign', 'start', '('])) {
-				$negative = 1;
-				break;
-			}
+				if (in_array($last, ['sign', 'start', '('])) {
+					$negative = 1;
+					break;
+				}
 			case '+':
 			case '~':
 			case '/':
 			case '*':
 			case '^':
-			if (($parses_number && $expression[$i-1] !== '-') || $last === '0' || $last === ')') {
-				$parses_number = 0;
-				$operand_number += 1;
-				if (!$parentheses && in_array($letter, array_keys($operand_indexes)))
-					$operand_indexes[$letter][] = $i;
-				$last = 'sign';
-			} else {
-				exit('-6');
-			}
-			break;
+				if (($parses_number && $expression[$i-1] !== '-') || $last === '0' || $last === ')') {
+					$parses_number = 0;
+					$operand_number += 1;
+					if (!$parentheses && in_array($letter, array_keys($operand_indexes)))
+						$operand_indexes[$letter][] = $i;
+					$last = 'sign';
+				} else {
+					exit('-6');
+				}
+				break;
 		}
 	}
-	if (($last != ')' && $last != 'number' && $last != '0') || $parentheses) {
+
+	if (($last !== ')' && $last !== 'number' && $last !== '0') || $parentheses) {
 		exit('-7');
 	} else {
 		return $operand_indexes;
@@ -119,17 +120,17 @@ function dissect_binom(string $expression): float {
 		$binom_operator = $expression[$binom_operator];
 		switch ($binom_operator) {
 			case '+':
-			return dissect_binom($substring1) + dissect_binom($substring2);
+				return dissect_binom($substring1) + dissect_binom($substring2);
 			case '-':
-			return dissect_binom($substring1) - dissect_binom($substring2);
+				return dissect_binom($substring1) - dissect_binom($substring2);
 			case '/':
-			return dissect_binom($substring1) / dissect_binom($substring2);
+				return dissect_binom($substring1) / dissect_binom($substring2);
 			case '*':
-			return dissect_binom($substring1) * dissect_binom($substring2);
+				return dissect_binom($substring1) * dissect_binom($substring2);
 			case '^':
-			return dissect_binom($substring1) ** dissect_binom($substring2);
+				return dissect_binom($substring1) ** dissect_binom($substring2);
 			case '~':
-			return gmp_root(dissect_binom($substring1), dissect_binom($substring2));	// Целая часть после извлечения корня. Хз, норм корня нету
+				return gmp_root(dissect_binom($substring1), dissect_binom($substring2));	// Целая часть после извлечения корня. Хз, норм корня нету
 		}
 	} else {	// Операнд это число
 		return dissect_number($expression);
